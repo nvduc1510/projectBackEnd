@@ -5,7 +5,9 @@
  */
 package com.luvina.la.service;
 
+import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.ListEmployeeDTO;
+import com.luvina.la.entity.Employee;
 import org.springframework.data.domain.Page;
 
 /**
@@ -28,4 +30,11 @@ public interface EmployeeService {
     Page<ListEmployeeDTO> getAllListEmployeesDTO(String employeeName, Long departmentId,
                                                  String ordEmployeeName, String ordCertificationName,
                                                  String ordEndDate, int offset, int limit);
+
+    /**
+    *Thuc hien add
+    * @param  employeeDTO key cua message
+    */
+    Employee addEmployees(EmployeeDTO employeeDTO);
+
 }

@@ -1,25 +1,28 @@
 package com.luvina.la.dto;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-public class EmployeeDTO implements Serializable {
-
-    private static final long serialVersionUID = 6868189362900231672L;
-
+@AllArgsConstructor
+public class EmployeeDTO {
     private Long employeeId;
     private String employeeName;
+    @JsonFormat(pattern = "yyyy/MM/dd")
     private Date employeeBirthDate;
-    private String departmentName;
     private String employeeEmail;
     private String employeeTelephone;
-    private String certificationName;
-    private Date endDate;
-    private BigDecimal score;
+    private  String employeeNameKana;
+    private String employeeLoginId;
+    private String employeeLoginPassword;
+    @JsonProperty("departmentId")
+    private long  departmentId;
+    @JsonProperty("certifications")
+    private List<EmployeeCertificationDTO> employeesCertifications;
 }

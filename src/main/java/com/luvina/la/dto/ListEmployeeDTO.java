@@ -21,9 +21,9 @@ public class ListEmployeeDTO implements Serializable {
 
     private String departmentName;
 
-    private Date startDate;
+    private LocalDate startDate;
 
-    private Date endDate;
+    private LocalDate endDate;
 
     private BigDecimal score;
 

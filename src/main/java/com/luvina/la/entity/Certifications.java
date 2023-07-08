@@ -3,6 +3,7 @@ import com.sun.istack.NotNull;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table( name="certifications")
@@ -18,4 +19,5 @@ public class Certifications {
 
     @Column(name = "certification_level")
     private int certificationLevel;
+
 }

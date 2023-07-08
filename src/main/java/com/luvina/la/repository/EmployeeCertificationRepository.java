@@ -6,6 +6,7 @@
 package com.luvina.la.repository;
 
 import com.luvina.la.entity.EmployeesCertifications;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,5 +15,5 @@ import org.springframework.stereotype.Repository;
  * @author nvduc
  */
 @Repository
-public interface EmployeeCertificationRepository extends CrudRepository<EmployeesCertifications, Long> {
+public interface EmployeeCertificationRepository extends JpaRepository<EmployeesCertifications, Long> {
 }

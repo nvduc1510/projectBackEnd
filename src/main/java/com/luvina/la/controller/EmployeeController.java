@@ -5,7 +5,10 @@
  */
 package com.luvina.la.controller;
 
+import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.ListEmployeeDTO;
+import com.luvina.la.entity.Employee;
+import com.luvina.la.payload.AddResponse;
 import com.luvina.la.payload.ListEmployeeResponse;
 import com.luvina.la.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
 
 /**
  * Xu ly cac logic lien quan den Employees
@@ -46,14 +51,39 @@ public class EmployeeController {
             @RequestParam(required = false, defaultValue = "") String ordEndDate,
             @RequestParam(required = false, defaultValue = "1") int offset,
             @RequestParam(required = false, defaultValue = "5") int limit) {
-
         try {
             Page<ListEmployeeDTO> employees = employeeService.getAllListEmployeesDTO(
-                    employeeName, departmentId, ordEmployeeName, ordCertificationName, ordEndDate, offset, limit);
+                    employeeName,
+                    departmentId,
+                    ordEmployeeName,
+                    ordCertificationName,
+                    ordEndDate,
+                    offset,
+                    limit);
             return ResponseEntity.ok(new ListEmployeeResponse("200", employees.getTotalElements(), employees.getContent()));
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to get list of employees");
         }
     }
+    /**
+     * Phương thức POST để thêm mới một nhân viên.
+     *
+     * @param employeeDTO Đối tượng EmployeeDTO chứa thông tin của nhân viên mới
+     * @return ResponseEntity chứa phản hồi với mã code, ID của nhân viên và thông điệp
+     */
+    @PostMapping()
+    public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO employeeDTO) {
+        try {
+            Employee employee = employeeService.addEmployees(employeeDTO);
+            Map<String, Object> message = new HashMap<>();
+            message.put("code","MSG001");
+            message.put("params",new ArrayList<>());
+            AddResponse response = new AddResponse("200", employee.getEmployeeId(),message);
+            return ResponseEntity.ok(response);
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add employee");
+        }
+    }
+
 }

@@ -15,13 +15,13 @@ public class ListEmployeeDTO implements Serializable {
 
     private String employeeName;
 
+    private LocalDate employeeBirthDate;
+
     private String employeeEmail;
 
     private String employeeTelephone;
 
     private String departmentName;
-
-    private LocalDate startDate;
 
     private LocalDate endDate;
 

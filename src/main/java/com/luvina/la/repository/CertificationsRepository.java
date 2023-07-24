@@ -16,4 +16,5 @@ import org.springframework.stereotype.Repository;
 */
 @Repository
 public interface CertificationsRepository extends CrudRepository<Certifications, Long> {
+    boolean existsByCertificationId(long certificationId);
 }

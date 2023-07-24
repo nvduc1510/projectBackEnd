@@ -5,6 +5,7 @@
  */
 package com.luvina.la.controller;
 
+import com.luvina.la.Validators.ValidatorsException;
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.ListEmployeeDTO;
 import com.luvina.la.entity.Employee;
@@ -66,24 +67,50 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to get list of employees");
         }
     }
+
     /**
      * Phương thức POST để thêm mới một nhân viên.
      *
      * @param employeeDTO Đối tượng EmployeeDTO chứa thông tin của nhân viên mới
      * @return ResponseEntity chứa phản hồi với mã code, ID của nhân viên và thông điệp
      */
+//    @PostMapping()
+//    public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO employeeDTO) {
+//        try {
+//            Employee employee = employeeService.addEmployees(employeeDTO);
+//            Map<String, Object> message = new HashMap<>();
+//            message.put("code","MSG001");
+//            message.put("params",new ArrayList<>());
+//            AddResponse response = new AddResponse("200", employee.getEmployeeId(),message);
+//            return ResponseEntity.ok(response);
+//        }catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add employee");
+//        }
+//    }
+
     @PostMapping()
-    public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO employeeDTO) {
+    public ResponseEntity<?> add(@RequestBody EmployeeDTO employeeDTO) {
+        Employee employeeNew;
         try {
-            Employee employee = employeeService.addEmployees(employeeDTO);
+            employeeNew = this.employeeService.createEmployee(employeeDTO);
+        }catch (ValidatorsException ex){
+            Map<String, Object> response = new HashMap<>();
             Map<String, Object> message = new HashMap<>();
-            message.put("code","MSG001");
-            message.put("params",new ArrayList<>());
-            AddResponse response = new AddResponse("200", employee.getEmployeeId(),message);
+            response.put("code", 500);
+            message.put("code", ex.getCode());
+            message.put("params", ex.getParams());
+            response.put("message",message);
             return ResponseEntity.ok(response);
-        }catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add employee");
         }
+        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> message = new HashMap<>();
+        response.put("code", 200);
+        response.put("employeeId", employeeNew.getEmployeeId());
+        message.put("code", "MSG001");
+        message.put("params", new ArrayList<>());
+        response.put("message",message);
+        return ResponseEntity.ok(response);
     }
+
 
 }

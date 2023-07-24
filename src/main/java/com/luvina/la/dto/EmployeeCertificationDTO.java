@@ -9,10 +9,10 @@ import java.time.LocalDate;
 @Data
 @AllArgsConstructor
 public class EmployeeCertificationDTO {
-    private Long employeeCertificationId;
+    private String certificationId;
 //    @JsonFormat(pattern = "yyyy/MM/dd")
-    private LocalDate startDate;
+    private String certificationStartDate;
 //    @JsonFormat(pattern = "yyyy/MM/dd")
-    private LocalDate endDate;
-    private BigDecimal score;
+    private String certificationEndDate;
+    private String employeeCertificationScore;
 }

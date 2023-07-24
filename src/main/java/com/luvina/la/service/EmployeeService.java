@@ -5,10 +5,12 @@
  */
 package com.luvina.la.service;
 
+import com.luvina.la.Validators.ValidatorsException;
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.ListEmployeeDTO;
 import com.luvina.la.entity.Employee;
 import org.springframework.data.domain.Page;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
 * Cung cấp các phương thức để truy xuất
@@ -35,6 +37,11 @@ public interface EmployeeService {
     *Thuc hien add
     * @param  employeeDTO key cua message
     */
-    Employee addEmployees(EmployeeDTO employeeDTO);
+//    Employee addEmployees(EmployeeDTO employeeDTO);
+
+    @Transactional
+    Employee createEmployee(EmployeeDTO employeeDTO)throws ValidatorsException;
+
+
 
 }

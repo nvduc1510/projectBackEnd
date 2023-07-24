@@ -1,5 +1,6 @@
 package com.luvina.la.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,10 +22,12 @@ public class EmployeesCertifications {
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
+    @JsonBackReference
     private Employee employee;
 
     @ManyToOne
     @JoinColumn(name = "certification_id")
+    @JsonBackReference
     private Certifications certification;
 
 

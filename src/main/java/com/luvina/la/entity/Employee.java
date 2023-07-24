@@ -1,6 +1,7 @@
 
 package com.luvina.la.entity;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
@@ -27,7 +28,7 @@ public class Employee implements Serializable {
     private String employeeNameKana;
 
     @Column(name = "employee_birth_date")
-    private Date employeeBirthDate;
+    private LocalDate employeeBirthDate;
 
     @Column(name = "employee_email")
     private String employeeEmail;

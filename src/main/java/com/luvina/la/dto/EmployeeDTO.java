@@ -1,9 +1,12 @@
+/*
+ * Copyright(C) 2023 Luvina Software Company
+ *
+ * EmployeeDTO.java, July 14, 2023 nvduc
+ */
 package com.luvina.la.dto;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -12,17 +15,17 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class EmployeeDTO {
-    private Long employeeId;
+    private String employeeId;
+//    @JsonProperty("departmentId")
+    private String  departmentId;
     private String employeeName;
-    @JsonFormat(pattern = "yyyy/MM/dd")
-    private Date employeeBirthDate;
+//    @JsonFormat(pattern = "yyyy/MM/dd")
+    private String employeeBirthDate;
     private String employeeEmail;
     private String employeeTelephone;
-    private  String employeeNameKana;
+    private String employeeNameKana;
     private String employeeLoginId;
     private String employeeLoginPassword;
-    @JsonProperty("departmentId")
-    private long  departmentId;
-    @JsonProperty("certifications")
-    private List<EmployeeCertificationDTO> employeesCertifications;
+//    @JsonProperty("certifications")
+    private List<EmployeeCertificationDTO> certifications;
 }

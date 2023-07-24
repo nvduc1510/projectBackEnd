@@ -5,6 +5,8 @@
  */
 package com.luvina.la.service.impl;
 
+import com.luvina.la.Validators.Validators;
+import com.luvina.la.Validators.ValidatorsException;
 import com.luvina.la.dto.EmployeeCertificationDTO;
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.ListEmployeeDTO;
@@ -28,6 +30,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
 *Xu ly các thông tin liên quan đến Employees
 * @author nvduc
@@ -42,6 +47,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     CertificationsRepository certificationsRepository;
     @Autowired
     EmployeeCertificationRepository employeeCertificationRepository;
+
+    @Autowired
+    Validators validators;
     /**
      * Phương thức này trả về một trang (Page) các đối tượng ListEmployeeDTO.
      * @param employeeName tên nhân viên
@@ -90,41 +98,104 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param employeeDTO Thông tin nhân viên được truyền dưới dạng đối tượng EmployeeDTO
      * @return Đối tượng Employee đã được thêm mới
      */
+//    @Override
+//    @Transactional
+//    public Employee addEmployees(EmployeeDTO employeeDTO) {
+//        Employee employee = new Employee();
+//        employee.setEmployeeName(employeeDTO.getEmployeeName());
+//        employee.setEmployeeBirthDate(employeeDTO.getEmployeeBirthDate());
+//        employee.setEmployeeEmail(employeeDTO.getEmployeeEmail());
+//        employeeDTO.setEmployeeTelephone(employeeDTO.getEmployeeTelephone());
+//        employeeDTO.setEmployeeName(employeeDTO.getEmployeeName());
+//        employee.setEmployeeLoginId(employeeDTO.getEmployeeLoginId());
+//
+//        String password = employeeDTO.getEmployeeLoginPassword();
+//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+//        employee.setEmployeeLoginPassword(passwordEncoder.encode(password));
+//
+//        Departments department = departmentRepository.findById(employeeDTO.getDepartmentId()).orElseThrow();
+//        employee.setDepartment(department);
+//        employeeRepository.save(employee);
+//
+//        if(employeeDTO.getCertifications() != null){
+//            for (EmployeeCertificationDTO employeeCertificationDTO : employeeDTO.getCertifications()) {
+//                Certifications certification = certificationsRepository
+//                        .findById(employeeCertificationDTO.getCertificationId())
+//                        .orElseThrow();
+//                EmployeesCertifications employeeCertification = new EmployeesCertifications();
+//                employeeCertification.setEmployee(employee);
+//                employeeCertification.setCertification(certification);
+//                employeeCertification.setStartDate(employeeCertificationDTO.getCertificationStartDate());
+//                employeeCertification.setEndDate(employeeCertificationDTO.getCertificationEndDate());
+//                employeeCertification.setScore(employeeCertificationDTO.getEmployeeCertificationScore());
+//                employeeCertificationRepository.save(employeeCertification);
+//            }
+//        }
+//        return employee;
+//    }
+
     @Override
     @Transactional
-    public Employee addEmployees(EmployeeDTO employeeDTO) {
-        Employee employee = new Employee();
-        employee.setEmployeeName(employeeDTO.getEmployeeName());
-        employee.setEmployeeBirthDate(employeeDTO.getEmployeeBirthDate());
-        employee.setEmployeeEmail(employeeDTO.getEmployeeEmail());
-        employeeDTO.setEmployeeTelephone(employeeDTO.getEmployeeTelephone());
-        employeeDTO.setEmployeeName(employeeDTO.getEmployeeName());
-        employee.setEmployeeLoginId(employeeDTO.getEmployeeLoginId());
+    public Employee createEmployee(EmployeeDTO employeeDTO) throws ValidatorsException {
+        Employee employeeNew = new Employee();
+        List<EmployeesCertifications> employeesCertificationsList = new ArrayList<>();
+        try {
 
-        String password = employeeDTO.getEmployeeLoginPassword();
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        employee.setEmployeeLoginPassword(passwordEncoder.encode(password));
-
-        Departments department = departmentRepository
-                .findById(employeeDTO.getDepartmentId())
-                .orElseThrow();
-        employee.setDepartment(department);
-        employeeRepository.save(employee);
-
-        if(employeeDTO.getEmployeesCertifications() != null){
-            for (EmployeeCertificationDTO employeeCertificationDTO : employeeDTO.getEmployeesCertifications()) {
-                Certifications certification = certificationsRepository
-                        .findById(employeeCertificationDTO.getEmployeeCertificationId())
-                        .orElseThrow();
-                EmployeesCertifications employeeCertification = new EmployeesCertifications();
-                employeeCertification.setEmployee(employee);
-                employeeCertification.setCertification(certification);
-                employeeCertification.setStartDate(employeeCertificationDTO.getStartDate());
-                employeeCertification.setEndDate(employeeCertificationDTO.getEndDate());
-                employeeCertification.setScore(employeeCertificationDTO.getScore());
-                employeeCertificationRepository.save(employeeCertification);
+            employeeNew.setEmployeeLoginId(validators.validEmployeeLoginId(employeeDTO.getEmployeeLoginId()));
+            // kiem tra employeeLoginId co ton tai kh
+            if(this.employeeRepository.existsByEmployeeLoginId(employeeNew.getEmployeeLoginId())){
+                List<String> params = new ArrayList<>();
+                params.add("アカウント名");
+                throw new ValidatorsException("ER003",params);
             }
+            Departments department = new Departments();
+            department.setDepartmentId(validators.validateDepartmentId(employeeDTO.getDepartmentId()));
+            employeeNew.setDepartment(department);
+            // kiem tra departmentId ton tai
+            if(!this.departmentRepository.existsByDepartmentId(department.getDepartmentId())){
+                List<String> params = new ArrayList<>();
+                params.add("グループ");
+                throw new ValidatorsException("ER004",params);
+            }
+            employeeNew.setEmployeeName(validators.validEmployeeName(employeeDTO.getEmployeeName()));
+            employeeNew.setEmployeeTelephone(validators.validatePhoneNumber(employeeDTO.getEmployeeTelephone()));
+            employeeNew.setEmployeeNameKana(validators.validNameKatakana(employeeDTO.getEmployeeNameKana()));
+            employeeNew.setEmployeeEmail(validators.validateEmail(employeeDTO.getEmployeeEmail()));
+            employeeNew.setEmployeeBirthDate(validators.validateBirthDay(employeeDTO.getEmployeeBirthDate()));
+            employeeNew.setEmployeeLoginPassword(validators.validatePassword(employeeDTO.getEmployeeLoginPassword()));
+            List<EmployeeCertificationDTO> employeeCertificationDTO = employeeDTO.getCertifications();
+            if (!employeeCertificationDTO.isEmpty()) {
+                for (EmployeeCertificationDTO certificationRequests : employeeCertificationDTO) {
+                    EmployeesCertifications employeesCertification = new EmployeesCertifications();
+                    Certifications certification = new Certifications();
+                    certification.setCertificationId(validators.validateCertificationId(certificationRequests.getCertificationId()));
+                    // kiem tra certificationId co ton tai kh
+                    if(!certificationsRepository.existsByCertificationId(certification.getCertificationId())){
+                        List<String> params = new ArrayList<>();
+                        params.add("資格");
+                        throw new ValidatorsException("ER004",params);
+                    }
+                    employeesCertification.setEmployee(employeeNew);
+                    employeesCertification.setCertification(certification);
+                    employeesCertification.setStartDate(validators.validateStartDate(certificationRequests.getCertificationStartDate()));
+                    employeesCertification.setEndDate(validators.validateEndDate(certificationRequests.getCertificationEndDate(),
+                            employeesCertification.getStartDate()));
+                    employeesCertification.setScore(validators.validateScore(certificationRequests.getEmployeeCertificationScore()));
+
+                    employeesCertificationsList.add(employeesCertification);
+                }
+
+            }
+        } catch (ValidatorsException ex) {
+            throw ex;
         }
-        return employee;
+
+        this.employeeRepository.save(employeeNew);
+        this.employeeCertificationRepository.saveAll(employeesCertificationsList);
+        return employeeNew;
     }
+
+//    public boolean isEmployeeLoginIdExists(String employeeLoginId) {
+//        return employeeRepository.existsByEmployeeLoginId(employeeLoginId);
+//    }
 }

@@ -14,5 +14,5 @@ public class CertificationDTO {
 
     private Integer certificationLevel;
 
-    private List<EmployeeCertificationDTO> employeeCertifications;
+//    private List<EmployeeCertificationDTO> employeeCertifications;
 }

@@ -15,4 +15,5 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface DepartmentRepository extends CrudRepository<Departments, Long> {
+    boolean existsByDepartmentId(long departmentId);
 }

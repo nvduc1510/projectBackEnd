@@ -24,9 +24,9 @@ public interface EmployeeRepository extends CrudRepository<Employee, Long> {
 
     Optional<Employee> findByEmployeeLoginId(String employeeLoginId);
     Optional<Employee> findByEmployeeId(Long employeeId);
-    @Query("SELECT new com.luvina.la.dto.ListEmployeeDTO(e.employeeId, e.employeeName," +
+    @Query("SELECT new com.luvina.la.dto.ListEmployeeDTO(e.employeeId, e.employeeName,e.employeeBirthDate," +
             " e.employeeEmail, e.employeeTelephone, d.departmentName," +
-            " ec.startDate, ec.endDate, ec.score, c.certificationName) " +
+            "ec.endDate, ec.score, c.certificationName) " +
             "FROM Employee e " +
             "JOIN e.department d " +
             "LEFT JOIN e.employeeCertifications ec " +
@@ -57,5 +57,8 @@ public interface EmployeeRepository extends CrudRepository<Employee, Long> {
                                              @Param("ordCertificationName") String ordCertificationName,
                                              @Param("ordEndDate") String ordEndDate,
                                              Pageable pageable);
+
+    boolean existsByEmployeeLoginId(String employeeLoginId);
+
 }
 

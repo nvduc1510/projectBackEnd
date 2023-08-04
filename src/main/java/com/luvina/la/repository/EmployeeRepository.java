@@ -57,7 +57,6 @@ public interface EmployeeRepository extends CrudRepository<Employee, Long> {
                                              @Param("ordCertificationName") String ordCertificationName,
                                              @Param("ordEndDate") String ordEndDate,
                                              Pageable pageable);
-
     boolean existsByEmployeeLoginId(String employeeLoginId);
 
 }

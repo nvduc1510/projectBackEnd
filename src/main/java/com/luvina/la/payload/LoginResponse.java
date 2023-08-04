@@ -15,7 +15,6 @@ public class LoginResponse {
         this.accessToken = accessToken;
         this.tokenType = "Bearer";
     }
-
     public LoginResponse(Map<String, String> errors) {
         this.errors = errors;
     }

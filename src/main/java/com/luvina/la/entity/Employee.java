@@ -42,7 +42,7 @@ public class Employee implements Serializable {
     @Column(name = "employee_login_password")
     private String employeeLoginPassword;
 
-    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL,  orphanRemoval = true)
     private EmployeesCertifications employeeCertifications;
 
 }

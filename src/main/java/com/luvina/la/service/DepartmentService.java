@@ -8,7 +8,7 @@ package com.luvina.la.service;
 import com.luvina.la.entity.Departments;
 import java.util.List;
 /**
-* Cung cấp các phương thức truy xuất
+* Cung cấp các phương thức truy xuất department
 * @author nvduc
 */
 public interface DepartmentService {

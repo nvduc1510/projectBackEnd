@@ -5,12 +5,16 @@
  */
 package com.luvina.la.service;
 
-import com.luvina.la.Validators.ValidatorsException;
+import com.luvina.la.dto.GetEmployeeDTO;
+import com.luvina.la.payload.EmployeeResponse;
+import com.luvina.la.payload.validator.ValidatorsException;
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.ListEmployeeDTO;
 import com.luvina.la.entity.Employee;
 import org.springframework.data.domain.Page;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 /**
 * Cung cấp các phương thức để truy xuất
@@ -32,16 +36,22 @@ public interface EmployeeService {
     Page<ListEmployeeDTO> getAllListEmployeesDTO(String employeeName, Long departmentId,
                                                  String ordEmployeeName, String ordCertificationName,
                                                  String ordEndDate, int offset, int limit);
-
     /**
     *Thuc hien add
     * @param  employeeDTO key cua message
     */
 //    Employee addEmployees(EmployeeDTO employeeDTO);
-
     @Transactional
     Employee createEmployee(EmployeeDTO employeeDTO)throws ValidatorsException;
 
+    /**
+     * Lấy thông tin nhân viên dựa trên employeeId.
+     *
+     * @param employeeId Id của nhân viên cần lấy thông tin.
+     * @return Đối tượng GetEmployeeDTO chứa thông tin nhân viên nếu tìm thấy.
+     * @throws EmployeeResponse Nếu không tìm thấy nhân viên, sẽ ném lỗi EmployeeResponse.
+     */
+    GetEmployeeDTO getEmployeeById(long employeeId) throws EmployeeResponse;
 
-
+    Optional<Employee> deleteEmployee(long employeeId) ;
 }

@@ -1,10 +1,16 @@
+/*
+ * Copyright(C) 2023 Luvina Software Company
+ *
+ * EmployeeController.java, July 5, 2023 nvduc
+ */
 package com.luvina.la.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+/**
+* Lớp `EmployeeDTO` đại diện cho đối tượng dùng để chứa thông tin cơ bản về một nhân viên.
+* @author nvduc
+*/
 
 @Data
 @AllArgsConstructor

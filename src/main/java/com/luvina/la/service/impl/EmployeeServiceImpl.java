@@ -5,11 +5,10 @@
  */
 package com.luvina.la.service.impl;
 
-import com.luvina.la.Validators.Validators;
-import com.luvina.la.Validators.ValidatorsException;
-import com.luvina.la.dto.EmployeeCertificationDTO;
-import com.luvina.la.dto.EmployeeDTO;
-import com.luvina.la.dto.ListEmployeeDTO;
+import com.luvina.la.dto.*;
+import com.luvina.la.payload.EmployeeResponse;
+import com.luvina.la.payload.validator.Validators;
+import com.luvina.la.payload.validator.ValidatorsException;
 import com.luvina.la.entity.Certifications;
 import com.luvina.la.entity.Departments;
 import com.luvina.la.entity.Employee;
@@ -21,17 +20,17 @@ import com.luvina.la.repository.DepartmentRepository;
 import com.luvina.la.repository.EmployeeCertificationRepository;
 import com.luvina.la.repository.EmployeeRepository;
 import com.luvina.la.service.EmployeeService;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
 *Xu ly các thông tin liên quan đến Employees
@@ -98,51 +97,15 @@ public class EmployeeServiceImpl implements EmployeeService {
      * @param employeeDTO Thông tin nhân viên được truyền dưới dạng đối tượng EmployeeDTO
      * @return Đối tượng Employee đã được thêm mới
      */
-//    @Override
-//    @Transactional
-//    public Employee addEmployees(EmployeeDTO employeeDTO) {
-//        Employee employee = new Employee();
-//        employee.setEmployeeName(employeeDTO.getEmployeeName());
-//        employee.setEmployeeBirthDate(employeeDTO.getEmployeeBirthDate());
-//        employee.setEmployeeEmail(employeeDTO.getEmployeeEmail());
-//        employeeDTO.setEmployeeTelephone(employeeDTO.getEmployeeTelephone());
-//        employeeDTO.setEmployeeName(employeeDTO.getEmployeeName());
-//        employee.setEmployeeLoginId(employeeDTO.getEmployeeLoginId());
-//
-//        String password = employeeDTO.getEmployeeLoginPassword();
-//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-//        employee.setEmployeeLoginPassword(passwordEncoder.encode(password));
-//
-//        Departments department = departmentRepository.findById(employeeDTO.getDepartmentId()).orElseThrow();
-//        employee.setDepartment(department);
-//        employeeRepository.save(employee);
-//
-//        if(employeeDTO.getCertifications() != null){
-//            for (EmployeeCertificationDTO employeeCertificationDTO : employeeDTO.getCertifications()) {
-//                Certifications certification = certificationsRepository
-//                        .findById(employeeCertificationDTO.getCertificationId())
-//                        .orElseThrow();
-//                EmployeesCertifications employeeCertification = new EmployeesCertifications();
-//                employeeCertification.setEmployee(employee);
-//                employeeCertification.setCertification(certification);
-//                employeeCertification.setStartDate(employeeCertificationDTO.getCertificationStartDate());
-//                employeeCertification.setEndDate(employeeCertificationDTO.getCertificationEndDate());
-//                employeeCertification.setScore(employeeCertificationDTO.getEmployeeCertificationScore());
-//                employeeCertificationRepository.save(employeeCertification);
-//            }
-//        }
-//        return employee;
-//    }
-
     @Override
+    @SneakyThrows
     @Transactional
     public Employee createEmployee(EmployeeDTO employeeDTO) throws ValidatorsException {
         Employee employeeNew = new Employee();
         List<EmployeesCertifications> employeesCertificationsList = new ArrayList<>();
         try {
-
             employeeNew.setEmployeeLoginId(validators.validEmployeeLoginId(employeeDTO.getEmployeeLoginId()));
-            // kiem tra employeeLoginId co ton tai kh
+            // kiem tra employeeLoginId co ton tai hay khong
             if(this.employeeRepository.existsByEmployeeLoginId(employeeNew.getEmployeeLoginId())){
                 List<String> params = new ArrayList<>();
                 params.add("アカウント名");
@@ -169,7 +132,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                     EmployeesCertifications employeesCertification = new EmployeesCertifications();
                     Certifications certification = new Certifications();
                     certification.setCertificationId(validators.validateCertificationId(certificationRequests.getCertificationId()));
-                    // kiem tra certificationId co ton tai kh
+                    // kiem tra certificationId co ton tai hay khong
                     if(!certificationsRepository.existsByCertificationId(certification.getCertificationId())){
                         List<String> params = new ArrayList<>();
                         params.add("資格");
@@ -181,21 +144,78 @@ public class EmployeeServiceImpl implements EmployeeService {
                     employeesCertification.setEndDate(validators.validateEndDate(certificationRequests.getCertificationEndDate(),
                             employeesCertification.getStartDate()));
                     employeesCertification.setScore(validators.validateScore(certificationRequests.getEmployeeCertificationScore()));
-
                     employeesCertificationsList.add(employeesCertification);
                 }
-
             }
         } catch (ValidatorsException ex) {
             throw ex;
         }
-
         this.employeeRepository.save(employeeNew);
         this.employeeCertificationRepository.saveAll(employeesCertificationsList);
         return employeeNew;
     }
 
-//    public boolean isEmployeeLoginIdExists(String employeeLoginId) {
-//        return employeeRepository.existsByEmployeeLoginId(employeeLoginId);
-//    }
+    /**
+     * Truy xuất thông tin nhân viên dựa trên employeeId được cung cấp.
+     *
+     * @param employeeId Định danh duy nhất của nhân viên cần lấy thông tin.
+     * @return Một đối tượng GetEmployeeDTO chứa thông tin của nhân viên.
+     * @throws EmployeeResponse Nếu không tìm thấy nhân viên với employeeId cung cấp hoặc nếu xảy ra lỗi xác thực đầu vào.
+     */
+    @Override
+    public GetEmployeeDTO getEmployeeById(long employeeId) throws EmployeeResponse {
+        boolean isEmployeeIdExists = employeeRepository.existsById(employeeId);
+        if (!isEmployeeIdExists) {
+            List<String> params = new ArrayList<>();
+            params.add("該当するユーザは存在していません。");
+            throw new EmployeeResponse("ER013", params);
+        }
+
+        Employee employee = employeeRepository.findById(employeeId).orElseThrow(() ->{
+            List<String> params = new ArrayList<>();
+            params.add("「画面項目名」を入力してください");
+            return new EmployeeResponse("ER001", params);
+        });
+
+        GetEmployeeDTO dto = new GetEmployeeDTO();
+        dto.setCode(200);
+        dto.setEmployeeId(employee.getEmployeeId());
+        dto.setEmployeeName(employee.getEmployeeName());
+        dto.setEmployeeBirthDate(employee.getEmployeeBirthDate());
+        dto.setDepartmentId(String.valueOf(employee.getDepartment().getDepartmentId()));
+        dto.setDepartmentName(employee.getDepartment().getDepartmentName());
+        dto.setEmployeeEmail(employee.getEmployeeEmail());
+        dto.setEmployeeTelephone(employee.getEmployeeTelephone());
+        dto.setEmployeeNameKana(employee.getEmployeeNameKana());
+        dto.setEmployeeLoginId(employee.getEmployeeLoginId());
+
+        EmployeesCertifications employeesCertifications = employee.getEmployeeCertifications();
+        if(employeesCertifications != null) {
+            List<GetEmployeeCertificationDTO> getEmployeeCertificationDTO = new ArrayList<>();
+            GetEmployeeCertificationDTO getEmployeeCertificationDTO1 = new GetEmployeeCertificationDTO();
+            getEmployeeCertificationDTO1.setCertificationId(employeesCertifications.getCertification().getCertificationId());
+            getEmployeeCertificationDTO1.setCertificationName(employeesCertifications.getCertification().getCertificationName());
+            getEmployeeCertificationDTO1.setStartDate(employeesCertifications.getStartDate());
+            getEmployeeCertificationDTO1.setEndDate(employeesCertifications.getEndDate());
+            getEmployeeCertificationDTO1.setScore(employeesCertifications.getScore());
+            getEmployeeCertificationDTO.add(getEmployeeCertificationDTO1);
+            dto.setCertifications(getEmployeeCertificationDTO);
+        }
+        return  dto;
+    }
+    @SneakyThrows
+    @Override
+    public Optional<Employee> deleteEmployee(long employeeId)  {
+//        boolean isEmployeeIdExists = employeeRepository.existsById(employeeId);
+//        if (!isEmployeeIdExists) {
+//            List<String> params = new ArrayList<>();
+//            params.add("該当するユーザは存在していません。");
+//            throw new EmployeeResponse("ER014", params);
+//        }
+        Optional<Employee> employee = employeeRepository.findById(employeeId);
+        if (employee.isPresent()) {
+            employeeRepository.deleteById(employeeId);
+        }
+        return employee;
+    }
 }

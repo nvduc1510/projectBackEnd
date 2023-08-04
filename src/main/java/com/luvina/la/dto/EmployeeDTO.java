@@ -11,21 +11,21 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-
+/**
+ * Lớp `EmployeeDTO` đại diện cho đối tượng dùng để chứa thông tin cơ bản về một nhân viên.
+ * @author nvduc
+ */
 @Data
 @AllArgsConstructor
 public class EmployeeDTO {
     private String employeeId;
-//    @JsonProperty("departmentId")
     private String  departmentId;
     private String employeeName;
-//    @JsonFormat(pattern = "yyyy/MM/dd")
     private String employeeBirthDate;
     private String employeeEmail;
     private String employeeTelephone;
     private String employeeNameKana;
     private String employeeLoginId;
     private String employeeLoginPassword;
-//    @JsonProperty("certifications")
     private List<EmployeeCertificationDTO> certifications;
 }

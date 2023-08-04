@@ -5,12 +5,14 @@
  */
 package com.luvina.la.controller;
 
-import com.luvina.la.Validators.ValidatorsException;
+import com.luvina.la.dto.GetEmployeeDTO;
+import com.luvina.la.payload.EmployeeResponse;
+import com.luvina.la.payload.validator.ValidatorsException;
 import com.luvina.la.dto.EmployeeDTO;
 import com.luvina.la.dto.ListEmployeeDTO;
 import com.luvina.la.entity.Employee;
-import com.luvina.la.payload.AddResponse;
 import com.luvina.la.payload.ListEmployeeResponse;
+import com.luvina.la.repository.EmployeeRepository;
 import com.luvina.la.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,7 +32,8 @@ import java.util.*;
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
-
+    @Autowired
+    private EmployeeRepository employeeRepository;
     /**
      * Phương thức controller để lấy danh sách nhân viên dưới dạng phản hồi (response).
      *
@@ -54,15 +57,9 @@ public class EmployeeController {
             @RequestParam(required = false, defaultValue = "5") int limit) {
         try {
             Page<ListEmployeeDTO> employees = employeeService.getAllListEmployeesDTO(
-                    employeeName,
-                    departmentId,
-                    ordEmployeeName,
-                    ordCertificationName,
-                    ordEndDate,
-                    offset,
-                    limit);
+                    employeeName, departmentId, ordEmployeeName, ordCertificationName,
+                    ordEndDate, offset, limit);
             return ResponseEntity.ok(new ListEmployeeResponse("200", employees.getTotalElements(), employees.getContent()));
-
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to get list of employees");
         }
@@ -74,20 +71,6 @@ public class EmployeeController {
      * @param employeeDTO Đối tượng EmployeeDTO chứa thông tin của nhân viên mới
      * @return ResponseEntity chứa phản hồi với mã code, ID của nhân viên và thông điệp
      */
-//    @PostMapping()
-//    public ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO employeeDTO) {
-//        try {
-//            Employee employee = employeeService.addEmployees(employeeDTO);
-//            Map<String, Object> message = new HashMap<>();
-//            message.put("code","MSG001");
-//            message.put("params",new ArrayList<>());
-//            AddResponse response = new AddResponse("200", employee.getEmployeeId(),message);
-//            return ResponseEntity.ok(response);
-//        }catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add employee");
-//        }
-//    }
-
     @PostMapping()
     public ResponseEntity<?> add(@RequestBody EmployeeDTO employeeDTO) {
         Employee employeeNew;
@@ -112,5 +95,63 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Lấy thông tin của một nhân viên dựa vào employeeId.
+     *
+     * @param employeeId Id của nhân viên cần lấy thông tin.
+     * @return ResponseEntity chứa thông tin nhân viên nếu tìm thấy, hoặc thông báo lỗi nếu xảy ra lỗi.
+     * Nếu nhân viên tồn tại, phản hồi sẽ có code 200 và dữ liệu của nhân viên (đối tượng GetEmployeeDTO).
+     * Nếu không tìm thấy nhân viên hoặc xảy ra lỗi, phản hồi sẽ có code 500 và thông báo lỗi cụ thể.
+     */
+    @GetMapping("/{employeeId}")
+    public ResponseEntity<?> getEmployeeById(@PathVariable long employeeId) {
+        GetEmployeeDTO employeeDTO;
+        try {
+            employeeDTO = employeeService.getEmployeeById(employeeId);
+        } catch (EmployeeResponse e) {
+            Map<String, Object> response = new HashMap<>();
+            Map<String, Object> message = new HashMap<>();
+            response.put("code", 500);
+            message.put("code", e.getCode());
+            message.put("params", e.getParams());
+            response.put("message",message);
+            return ResponseEntity.ok(response);
+        }
+        return ResponseEntity.ok(employeeDTO);
+    }
+
+    @DeleteMapping("{employeeId}")
+    public ResponseEntity<?> deleteEmployee(@PathVariable long employeeId) {
+
+        try {
+            boolean exits = employeeRepository.existsById(employeeId);
+            if(!exits){
+                Map<String, Object> response = new HashMap<>();
+                Map<String, Object> message = new HashMap<>();
+                List<String> messages = new ArrayList<>();
+                messages.add("システムエラーが発生しました。");
+                response.put("code", 500);
+                response.put("employeeId", employeeId);
+                message.put("code", "MSG003");
+                message.put("params", messages);
+                response.put("message", message);
+                return ResponseEntity.ok(response);
+            }
+            Optional<Employee> employee = employeeService.deleteEmployee(employeeId);
+            List<String> messager = new ArrayList<>();
+            messager.add("システムエラーが発生しました。");
+            Map<String, Object> response  = new HashMap<>();
+            Map<String, Object> message = new HashMap<>();
+            response.put("code",200);
+            response.put("employeeId", employeeId);
+            message.put("code", "MSG003");
+            message.put("params", messager);
+            response.put("message", message);
+            return ResponseEntity.ok(response);
+        }  catch (Exception e) {
+            throw new RuntimeException();
+        }
+
+    }
 
 }
